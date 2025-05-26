@@ -133,10 +133,3 @@ Implementaría: (1) Autenticación con tokens JWT y refresh tokens, (2) Encripta
 - **IA**: DeepSeek API
 - **Testing**: unittest
 
-## Contribución
-
-1. Fork el proyecto
-2. Cree una rama para su feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit sus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abra un Pull Request
