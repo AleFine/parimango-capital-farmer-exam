@@ -131,8 +131,8 @@ Implementaría: (1) Autenticación con tokens JWT y refresh tokens, (2) Encripta
 
 ## Tecnologías Utilizadas
 
-- **Backend**: Flask, SQLite, OpenAI SDK con OpenAI
-- **Frontend**: HTML5, CSS3, JavaScript
+- **Backend**: Flask, SQLite, OpenAI SDK
+- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap CSS
 - **Autenticación**: Flask-Login, Werkzeug
 - **IA**: OpenAI API
 - **Testing**: unittest
