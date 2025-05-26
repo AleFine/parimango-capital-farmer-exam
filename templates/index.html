@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Cotización - Sistema Legal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-file-invoice"></i> Generar Nueva Cotización</h3>
+            </div>
+            <div class="card-body p-4">
+                <form id="cotizacionForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre_cliente" class="form-label">
+                                <i class="fas fa-user"></i> Nombre del Cliente *
+                            </label>
+                            <input type="text" class="form-control" id="nombre_cliente" required>
+                            <div class="invalid-feedback">Por favor ingrese el nombre del cliente</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Correo Electrónico *
+                            </label>
+                            <input type="email" class="form-control" id="email" required>
+                            <div class="invalid-feedback">Por favor ingrese un email válido</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo_servicio" class="form-label">
+                            <i class="fas fa-briefcase"></i> Tipo de Servicio *
+                        </label>
+                        <select class="form-select" id="tipo_servicio" required>
+                            <option value="">Seleccione un servicio...</option>
+                            {% for key, servicio in servicios.items() %}
+                            <option value="{{ key }}">
+                                {{ servicio.nombre }} - S/ {{ "{:,.2f}".format(servicio.precio) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Por favor seleccione un tipo de servicio</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="descripcion_caso" class="form-label">
+                            <i class="fas fa-file-text"></i> Descripción del Caso *
+                        </label>
+                        <textarea class="form-control" id="descripcion_caso" rows="4"
+                                  placeholder="Describa detalladamente el caso legal..." required></textarea>
+                        <div class="invalid-feedback">Por favor describa el caso</div>
+                        <small class="text-muted">
+                            Proporcione todos los detalles relevantes para una mejor evaluación
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-calculator"></i> Generar Cotización
+                    </button>
+                </form>
+
+                <!-- Spinner de carga -->
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Procesando...</span>
+                    </div>
+                    <p class="mt-2">Analizando caso con IA...</p>
+                </div>
+
+                <!-- Resultado de la cotización -->
+                <div class="cotizacion-resultado">
+                    <hr class="my-4">
+                    <div class="alert alert-success">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-check-circle"></i> Cotización Generada Exitosamente
+                        </h4>
+                        <div id="resultadoCotizacion"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validación y envío del formulario
+document.getElementById('cotizacionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Validar formulario
+    if (!this.checkValidity()) {
+        e.stopPropagation();
+        this.classList.add('was-validated');
+        return;
+    }
+
+    // Obtener datos del formulario
+    const formData = {
+        nombre_cliente: document.getElementById('nombre_cliente').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        tipo_servicio: document.getElementById('tipo_servicio').value,
+        descripcion_caso: document.getElementById('descripcion_caso').value.trim()
+    };
+
+    // Mostrar spinner
+    document.querySelector('.loading-spinner').style.display = 'block';
+    document.querySelector('.cotizacion-resultado').style.display = 'none';
+    this.style.display = 'none';
+
+    try {
+        // Enviar solicitud
+        const response = await fetch('/api/cotizacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Mostrar resultado
+            mostrarResultado(data);
+        } else {
+            throw new Error(data.error || 'Error al generar la cotización');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+        this.style.display = 'block';
+    } finally {
+        document.querySelector('.loading-spinner').style.display = 'none';
+    }
+});
+
+function mostrarResultado(data) {
+    const serviciosAdicionales = data.servicios_adicionales.length > 0
+        ? data.servicios_adicionales.join(', ')
+        : 'Ninguno';
+
+    const ajusteTexto = data.ajuste_precio > 0
+        ? `+${data.ajuste_precio}% por complejidad ${data.complejidad}`
+        : 'Sin ajuste';
+
+    const html = `
+        <dl class="row mb-3">
+            <dt class="col-sm-4">Número de Cotización:</dt>
+            <dd class="col-sm-8"><strong>${data.numero_cotizacion}</strong></dd>
+
+            <dt class="col-sm-4">Cliente:</dt>
+            <dd class="col-sm-8">${data.nombre_cliente}</dd>
+
+            <dt class="col-sm-4">Email:</dt>
+            <dd class="col-sm-8">${data.email}</dd>
+
+            <dt class="col-sm-4">Servicio:</dt>
+            <dd class="col-sm-8">${data.tipo_servicio}</dd>
+
+            <dt class="col-sm-4">Complejidad del Caso:</dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-${data.complejidad === 'Alta' ? 'danger' : data.complejidad === 'Media' ? 'warning' : 'success'}">
+                    ${data.complejidad}
+                </span>
+            </dd>
+
+            <dt class="col-sm-4">Precio Base:</dt>
+            <dd class="col-sm-8">S/ ${data.precio_base.toLocaleString('es-PE', {minimumFractionDigits: 2})}</dd>
+
+            <dt class="col-sm-4">Ajuste de Precio:</dt>
+            <dd class="col-sm-8">${ajusteTexto}</dd>
+
+            <dt class="col-sm-4">Precio Final:</dt>
+            <dd class="col-sm-8">
+                <h4 class="text-primary mb-0">
+                    S/ ${data.precio_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}
+                </h4>
+            </dd>
+
+            <dt class="col-sm-4">Servicios Adicionales:</dt>
+            <dd class="col-sm-8">${serviciosAdicionales}</dd>
+        </dl>
+
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">Propuesta Generada por IA:</h5>
+                <p class="card-text" style="white-space: pre-line;">${data.propuesta_texto}</p>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-primary" onclick="location.reload()">
+                <i class="fas fa-plus"></i> Nueva Cotización
+            </button>
+            <a href="/cotizaciones" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Ver Todas las Cotizaciones
+            </a>
+        </div>
+    `;
+
+    document.getElementById('resultadoCotizacion').innerHTML = html;
+    document.querySelector('.cotizacion-resultado').style.display = 'block';
+}
+
+// Validación en tiempo real del email
+document.getElementById('email').addEventListener('blur', function() {
+    const email = this.value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (email && !emailRegex.test(email)) {
+        this.classList.add('is-invalid');
+    } else {
+        this.classList.remove('is-invalid');
+    }
+});
+</script>
+{% endblock %}
