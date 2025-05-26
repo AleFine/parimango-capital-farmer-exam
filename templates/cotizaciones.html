@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de Cotizaciones - Sistema Legal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="mb-0"><i class="fas fa-list"></i> Listado de Cotizaciones</h3>
+        <a href="{{ url_for('index') }}" class="btn btn-light btn-sm">
+            <i class="fas fa-plus"></i> Nueva Cotización
+        </a>
+    </div>
+    <div class="card-body">
+        {% if cotizaciones %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>N° Cotización</th>
+                        <th>Cliente</th>
+                        <th>Servicio</th>
+                        <th>Complejidad</th>
+                        <th>Precio Final</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cot in cotizaciones %}
+                    <tr>
+                        <td><strong>{{ cot.numero_cotizacion }}</strong></td>
+                        <td>
+                            {{ cot.nombre_cliente }}<br>
+                            <small class="text-muted">{{ cot.email }}</small>
+                        </td>
+                        <td>{{ cot.tipo_servicio_nombre }}</td>
+                        <td>
+                            {% set badge_color = 'danger' if cot.complejidad == 'Alta' else 'warning' if cot.complejidad == 'Media' else 'success' %}
+                            <span class="badge bg-{{ badge_color }}">
+                                {{ cot.complejidad }}
+                            </span>
+                        </td>
+                        <td>
+                            S/ {{ "{:,.2f}".format(cot.precio_final) }}
+                            {% if cot.ajuste_precio > 0 %}
+                            <br><small class="text-muted">+{{ cot.ajuste_precio }}%</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ cot.fecha_creacion[:10] }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="verDetalle({{ cot.id }})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted py-5">
+            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+            No hay cotizaciones registradas aún.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para ver detalles -->
+<div class="modal fade" id="detalleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle de Cotización</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Datos de cotizaciones para mostrar en modal
+const cotizaciones = {{ cotizaciones|tojson }};
+
+function verDetalle(id) {
+    const cot = cotizaciones.find(c => c.id === id);
+    if (!cot) return;
+
+    const serviciosAdicionales = cot.servicios_adicionales && cot.servicios_adicionales.length > 0
+        ? cot.servicios_adicionales.join(', ')
+        : 'Ninguno';
+
+    const html = `
+        <h6>Información del Cliente</h6>
+        <p><strong>Nombre:</strong> ${cot.nombre_cliente}<br>
+        <strong>Email:</strong> ${cot.email}</p>
+
+        <h6>Detalles del Servicio</h6>
+        <p><strong>Tipo:</strong> ${cot.tipo_servicio_nombre}<br>
+        <strong>Complejidad:</strong> <span class="badge bg-${cot.complejidad === 'Alta' ? 'danger' : cot.complejidad === 'Media' ? 'warning' : 'success'}">${cot.complejidad}</span><br>
+        <strong>Servicios Adicionales:</strong> ${serviciosAdicionales}</p>
+
+        <h6>Descripción del Caso</h6>
+        <p>${cot.descripcion_caso}</p>
+
+        <h6>Propuesta Generada</h6>
+        <div class="bg-light p-3 rounded">
+            <p style="white-space: pre-line;">${cot.propuesta_texto}</p>
+        </div>
+
+        <h6>Resumen de Costos</h6>
+        <table class="table table-sm">
+            <tr>
+                <td>Precio Base:</td>
+                <td class="text-end">S/ ${cot.precio_base.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+                <td>Ajuste por Complejidad (${cot.ajuste_precio}%):</td>
+                <td class="text-end">S/ ${((cot.precio_final - cot.precio_base)).toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr class="table-primary">
+                <td><strong>Precio Final:</strong></td>
+                <td class="text-end"><strong>S/ ${cot.precio_final.toLocaleString('es-PE', {minimumFractionDigits: 2})}</strong></td>
+            </tr>
+        </table>
+    `;
+
+    document.getElementById('modalContent').innerHTML = html;
+    new bootstrap.Modal(document.getElementById('detalleModal')).show();
+}
+</script>
+{% endblock %}
