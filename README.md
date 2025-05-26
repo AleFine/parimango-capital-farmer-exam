@@ -24,16 +24,20 @@ parimango-capital-farmer-exam/
    git clone https://github.com/AleFin parimango-capital-farmer-exam.git
    cd parimango-capital-farmer-exam
    ```
+3. **(Opcional) Activar un .venv**
+   ```bash
+   python -m venv .venv .\.venv\Scripts\Activate
+   ```
 
-2. **Instale las dependencias**
+4. **Instale las dependencias**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Configure la API Key de DeepSeek**
+5. **Configure la API Key de OpenAI**
    - La API key ya está configurada para este caso de prueba
 
-4. **Ejecute la aplicación**
+6. **Ejecute la aplicación**
    ```bash
    python app.py
    ```
@@ -57,7 +61,7 @@ parimango-capital-farmer-exam/
 
 ## APIs Utilizadas
 
-- **DeepSeek API**: Análisis inteligente de casos legales para determinar complejidad, ajuste de precios y generación de propuestas personalizadas
+- **OpenAI API**: Análisis inteligente de casos legales para determinar complejidad, ajuste de precios y generación de propuestas personalizadas
 
 ## Funcionalidades Principales
 
@@ -86,7 +90,7 @@ parimango-capital-farmer-exam/
 
 **Tests Unitarios**: Suite de pruebas automatizadas para validar funcionalidades críticas
 
-**IA Avanzada**: Integración con DeepSeek para análisis contextual de casos legales
+**IA Avanzada**: Integración con OpenAI para análisis contextual de casos legales
 
 **Dashboard de Cotizaciones**: Interface completa para gestión y seguimiento
 
@@ -127,9 +131,9 @@ Implementaría: (1) Autenticación con tokens JWT y refresh tokens, (2) Encripta
 
 ## Tecnologías Utilizadas
 
-- **Backend**: Flask, SQLite, OpenAI SDK con deepseek
+- **Backend**: Flask, SQLite, OpenAI SDK con OpenAI
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Autenticación**: Flask-Login, Werkzeug
-- **IA**: DeepSeek API
+- **IA**: OpenAI API
 - **Testing**: unittest
 
