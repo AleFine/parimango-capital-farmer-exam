@@ -21,7 +21,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Cliente DeepSeek/OpenAI
+# Cliente DeepSeek/OpenAI 
+# Api publica para facilitar la revision de este ejercicio, en cualquier otro caso
+# Colocamos esta secret key en el .env
 client = OpenAI(
   api_key="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"
 )
