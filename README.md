@@ -31,8 +31,7 @@ parimango-capital-farmer-exam/
    ```
 
 3. **Configure la API Key de DeepSeek**
-   - Edite `app.py` y reemplace la API key en la línea 25
-   - O configure como variable de entorno
+   - La API key ya está configurada para este caso de prueba
 
 4. **Ejecute la aplicación**
    ```bash
