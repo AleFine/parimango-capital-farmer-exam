@@ -7,12 +7,13 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from openai import OpenAI
+import os  # ensure os imported for env vars
 import unittest
 from functools import wraps
 
 # Configuración de Flask
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
+app.config['SECRET_KEY'] = 'secret-key-production'
 app.config['DATABASE'] = 'cotizaciones.db'
 
 # Configuración de Flask-Login
@@ -20,10 +21,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Cliente DeepSeek API
+# Cliente DeepSeek/OpenAI
 client = OpenAI(
-    api_key="sk-3a0649ce0aac4caeb676530d9c7f3634",
-    base_url="https://api.deepseek.com"
+  api_key="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"
 )
 
 
@@ -190,14 +190,14 @@ def analizar_con_ia(descripcion, tipo_servicio):
         La propuesta debe ser profesional, mencionar los servicios incluidos, tiempo estimado y condiciones básicas.
         """
 
+        # Llamada a la API de DeepSeek/OpenAI
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="gpt-4o-mini",
+            store=True,
             messages=[
-                {"role": "system",
-                 "content": "Eres un asesor legal experto. Siempre respondes en formato JSON válido."},
+                {"role": "system", "content": "Eres un asesor legal experto. Siempre respondes en formato JSON válido."},
                 {"role": "user", "content": prompt}
-            ],
-            stream=False
+            ]
         )
 
         # Parsear la respuesta JSON
