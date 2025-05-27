@@ -21,7 +21,7 @@ parimango-capital-farmer-exam/
 
 1. **Clone el repositorio**
    ```bash
-   git clone https://github.com/AleFin parimango-capital-farmer-exam.git
+   git clone https://github.com/AleFine/parimango-capital-farmer-exam.git
    cd parimango-capital-farmer-exam
    ```
 3. **(Opcional) Activar un .venv**
